@@ -1,48 +1,44 @@
-# Discord MCP Bot
+# Discord MCP Bot - Server Component
 
-A Discord bot that uses Mastra's MCP (Model Context Protocol) tools to provide intelligent assistance and answer questions about Mastra.ai.
+A Discord bot server that integrates with [Mastra's MCP Bot component](https://github.com/mastra-ai/discord-mcp-bot) to provide intelligent assistance and answer questions about Mastra.ai.
 
 ## Overview
 
-This Discord bot leverages Mastra's MCP tools and GPT-4 to:
-- Answer questions about Mastra.ai, its features, and capabilities
-- Provide links to relevant documentation and examples
-- Offer expert guidance on Mastra.ai implementation
-- Share code examples when relevant
+This Discord bot server works with the Mastra MCP component to:
+- Handle Discord interactions and message routing
+- Manage bot commands and permissions
+- Provide Discord-specific functionality like threads and DMs
+- Interface with the Mastra component for intelligent responses
 
 ## Prerequisites
 
 - Node.js v20.0+
 - npm
-- OpenAI API key
 - Discord bot token
+- Access to [discord-mcp-bot](https://github.com/mastra-ai/discord-mcp-bot) component
 
 ## Getting Started
 
 1. Clone the repository:
-
    ```bash
-   git clone https://github.com/mastra-ai/mastra
-   cd examples/discord-mcp-bot
+   git clone https://github.com/mastra-ai/discord-mcp-server
+   cd discord-mcp-server
    ```
 
 2. Install dependencies:
-
    ```bash
    npm install
    ```
 
-3. Create a `.env` file with your API keys:
-
+3. Create a `.env` file with your Discord credentials:
    ```
-   OPENAI_API_KEY=your_openai_api_key
    DISCORD_BOT_TOKEN=your_discord_bot_token  
    DISCORD_CLIENT_ID=your_discord_client_id
    DISCORD_PUBLIC_KEY=your_discord_public_key
+   MASTRA_URL=your_mastra_url
    ```
 
-4. Run the bot:
-
+4. Run the server:
    ```bash
    npm start
    ```
@@ -77,37 +73,32 @@ This Discord bot leverages Mastra's MCP tools and GPT-4 to:
 ## Features
 
 - **Direct Message Support**: Users can DM the bot to ask questions
-- **Intelligent Responses**: Uses GPT-4 to provide accurate and contextual answers
-- **Documentation Links**: Provides relevant links to Mastra documentation
-- **Code Examples**: Shares appropriate code examples from the Mastra repository
 - **Slash Commands**: Uses Discord's slash commands to interact with the bot
    - `/ask`: Ask the bot a question
    - `/cleardm`: Clear the bot messages in the user's DMs
 - **Threads**: Uses Discord's threads to provide a better user experience
+- **Integration**: Seamless integration with the Mastra MCP component
 
 ## Project Structure
 
 - `api/interactions.ts`: Main bot implementation and Discord client setup
-- `src/mastra/index.ts`: Mastra instance initialization
-- `src/mastra/agents/index.ts`: Discord MCP bot agent configuration
-- `src/mastra/tools/index.ts`: Tool implementations for code file handling
-
-## Scripts
-
 - `scripts/register-commands.ts`: Register the bot commands
 - `scripts/delete-commands.ts`: Delete the bot commands
 - `scripts/list-commands.ts`: List the bot commands
 
 ## Implementation Notes
 
-The bot is built with:
+The server is built with:
 - Discord.js for Discord integration
-- Mastra MCP tools for intelligent responses
-- OpenAI's GPT-4 for natural language understanding
 - TypeScript for type safety and better development experience
+- Integration with Mastra MCP component for intelligent responses
 
 For production deployment, consider:
 - Setting up proper logging
 - Implementing rate limiting
 - Adding monitoring and error tracking
 - Setting up a process manager (PM2, etc.)
+
+## Related Projects
+
+- [discord-mcp-bot](https://github.com/mastra-ai/discord-mcp-bot): Handles Mastra-specific functionality and intelligent responses

@@ -1,15 +1,15 @@
 {
-  "name": "discord-mcp-bot",
+  "name": "discord-mcp-server",
   "type": "module",
   "private": true,
-  "description": "A Discord MCP Bot",
+  "description": "A Discord MCP Bot Server",
   "main": "index.js",
   "version": "0.0.1",
   "engines": {
     "node": "18.x"
   },
   "scripts": {
-    "start": "vercel dev",
+    "start": "npx tsx api/index.ts",
     "register": "npx tsx scripts/register-commands.ts",
     "delete": "npx tsx scripts/delete-commands.ts",
     "list": "npx tsx scripts/list-commands.ts"
@@ -17,22 +17,18 @@
   "keywords": [
     "discord",
     "mcp",
-    "bot"
+    "bot",
+    "server"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@ai-sdk/openai": "latest",
-    "@mastra/core": "^0.6.4",
-    "@mastra/mcp": "^0.3.5",
-    "ai": "latest",
     "async-retry-ng": "^2.0.2",
     "discord-interactions": "^4.1.1",
     "discord.js": "^14.18.0",
     "dotenv": "^16.4.7",
     "express": "^5.0.1",
-    "typescript": "^5.8.2",
-    "zod": "^3.24.0"
+    "typescript": "^5.8.2"
   },
   "devDependencies": {
     "@types/express": "^5.0.1",
