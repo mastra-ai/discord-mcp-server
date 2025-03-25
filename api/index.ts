@@ -1,8 +1,16 @@
 import express from "express";
 import { config } from "dotenv";
 import { InteractionResponseType, InteractionType, verifyKey } from "discord-interactions";
-import { clearBotDirectMessages, COOLDOWN_PERIOD, DISCORD_MESSAGE_LENGTH_LIMIT, DiscordThread, MastraResponse, MAX_MESSAGE_LENGTH, updateDiscordMessage, userCooldowns } from "../bot/interactions.js";
-import { retryableFetch } from "../bot/helpers/fetch.js";
+import {
+  clearBotDirectMessages,
+  COOLDOWN_PERIOD,
+  DISCORD_MESSAGE_LENGTH_LIMIT,
+  MAX_MESSAGE_LENGTH,
+  updateDiscordMessage,
+  userCooldowns,
+  createThread,
+  generateMastraResponse,
+} from "../helpers";
 
 config();
 
@@ -51,6 +59,7 @@ app.post("/api/interactions", async (req: any, res: any) => {
     return res.send({ type: InteractionResponseType.PONG });
   }
   const isDM = interaction.channel.type === 1;
+  const isThread = interaction.channel.type === 11;
   const userId = isDM ? interaction.user.id : interaction.member.user.id;
 
   if (interaction.type === InteractionType.APPLICATION_COMMAND) {
@@ -110,22 +119,11 @@ app.post("/api/interactions", async (req: any, res: any) => {
 
         userCooldowns.set(userId, now + COOLDOWN_PERIOD);
 
-        if (!isDM) {
-          // Create thread using retryableFetch
-          const threadData = await retryableFetch<DiscordThread>(
-            `https://discord.com/api/v10/channels/${interaction.channel_id}/threads`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                name: `Chat with ${username}`,
-                auto_archive_duration: 60,
-                type: 11,
-              }),
-            }
+        if (!isDM && !isThread) {
+          // Create thread
+          const threadData = await createThread(
+            interaction.channel_id,
+            username
           );
 
           if (!threadData?.id) throw new Error("Failed to create thread");
@@ -154,23 +152,16 @@ app.post("/api/interactions", async (req: any, res: any) => {
           await updateDiscordMessage(interaction, `> ${content}`);
         }
 
-        const response = await retryableFetch<MastraResponse>(
-          `${process.env.MASTRA_URL}/api/agents/discordMCPBotAgent/generate`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ messages: [{ role: "user", content }] }),
-          }
-        );
+        const mastraResponse = await generateMastraResponse(content);
 
-        if (!response?.text) {
+        if (!mastraResponse?.text) {
           throw new Error("Invalid response from Mastra");
         }
 
-        await handleResponse(response.text, interaction, threadId);
+        await handleResponse(mastraResponse.text, interaction, threadId);
       } catch (error) {
         userCooldowns.delete(userId);
-        console.error("Error:", error);
+        console.error(`Error processing /ask command for ${userId}:`, error);
         await updateDiscordMessage(
           interaction,
           "Sorry, I encountered an error processing your request.",
@@ -178,12 +169,12 @@ app.post("/api/interactions", async (req: any, res: any) => {
         );
       }
       res.end();
-      return
+      return;
     }
   }
 
   res.status(400).send("Unknown interaction type");
-  return
+  return;
 });
 
 const PORT = process.env.PORT || 3000;

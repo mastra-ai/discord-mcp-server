@@ -1,7 +1,7 @@
 import retry from "async-retry-ng";
 
-const TIMEOUT = 10000; // 10 seconds
-const MAX_RETRIES = 5;
+const TIMEOUT = 20000; // 20 seconds
+const MAX_RETRIES = 10;
 
 const fetchWithTimeout = async (
   url: string,
@@ -14,8 +14,6 @@ const fetchWithTimeout = async (
         setTimeout(() => reject(new Error("Request timeout")), TIMEOUT)
       ),
     ])) as Response;
-
-    console.log(`Response status: ${response.status} for ${url}`);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -39,17 +37,8 @@ export const retryableFetch = async <T>(
   return retry(
     async (bail: (error: Error) => void) => {
       try {
-        console.log("Fetching:", url, "with method:", options.method);
-        if (options.body) {
-          console.log("Request body:", options.body);
-        }
-        console.log("Request headers:", options.headers);
-
         const response = await fetchWithTimeout(url, options);
         const text = await response.text();
-
-        console.log("Raw response:", text);
-
         let data;
         try {
           data = text ? JSON.parse(text) : null;
@@ -57,8 +46,6 @@ export const retryableFetch = async <T>(
           console.error("JSON parse error:", e);
           throw new Error(`Failed to parse JSON response: ${text}`);
         }
-
-        console.log("Parsed response:", data);
         return data as T;
       } catch (error: any) {
         console.error("Fetch error details:", {
@@ -71,16 +58,28 @@ export const retryableFetch = async <T>(
         if (
           error.message.includes("timeout") ||
           error.message.includes("429") ||
-          error.message.includes("500") ||
-          error.message.includes("502") ||
-          error.message.includes("503") ||
-          error.message.includes("504")
+          error.message.includes("50")
         ) {
-          console.log("Retryable error detected:", error.message);
-          throw error; // Retry timeouts, rate limits, and server errors
+          console.error(`Retryable Error:
+            URL: ${url}
+            Method: ${options.method}
+            Error: ${error.message}
+            Reason: ${
+              error.message.includes("timeout")
+                ? "Timeout"
+                : error.message.includes("429")
+                ? "Rate Limited"
+                : "Server Error"
+            }
+          `);
+          throw error;
         }
-        console.error("Non-retryable error:", error.message);
-
+        console.error(`Fatal Request Error:
+          URL: ${url}
+          Method: ${options.method}
+          Error: ${error.message}
+          ${error.stack ? `\nStack: ${error.stack}` : ""}
+        `);
         bail(error); // Don't retry other errors
         return null as T; // This will never be reached due to bail()
       }

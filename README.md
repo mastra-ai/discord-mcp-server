@@ -81,7 +81,7 @@ This Discord bot server works with the Mastra MCP component to:
 
 ## Project Structure
 
-- `api/interactions.ts`: Main bot implementation and Discord client setup
+- `api/index.ts`: Main bot implementation and Discord client setup
 - `scripts/register-commands.ts`: Register the bot commands
 - `scripts/delete-commands.ts`: Delete the bot commands
 - `scripts/list-commands.ts`: List the bot commands
