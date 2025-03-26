@@ -41,7 +41,7 @@ export async function updateDiscordMessage(
     if (threadId) {
       url = `https://discord.com/api/v10/channels/${threadId}/messages`;
     } else {
-      url = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages`;
+      url = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}`;
     }
 
     const response = await retryableFetch<DiscordMessage>(url, options);
