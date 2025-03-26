@@ -25,13 +25,12 @@ export const userCooldowns = new Map<string, number>();
 export async function updateDiscordMessage(
   interaction: any,
   content: string,
-  threadId?: string,
-  messageId?: string
+  threadId?: string
 ) {
   try {
     let url;
     const options: RequestInit = {
-      method: threadId ? (messageId ? "PATCH" : "POST") : "PATCH",
+      method: "POST",
       headers: {
         Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
         "Content-Type": "application/json",
@@ -40,11 +39,9 @@ export async function updateDiscordMessage(
     };
 
     if (threadId) {
-      url = messageId
-        ? `https://discord.com/api/v10/channels/${threadId}/messages/${messageId}`
-        : `https://discord.com/api/v10/channels/${threadId}/messages`;
+      url = `https://discord.com/api/v10/channels/${threadId}/messages`;
     } else {
-      url = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages/@original`;
+      url = `https://discord.com/api/v10/webhooks/${interaction.application_id}/${interaction.token}/messages`;
     }
 
     const response = await retryableFetch<DiscordMessage>(url, options);
